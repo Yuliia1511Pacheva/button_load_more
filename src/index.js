@@ -10,12 +10,9 @@ const paginationBtn = document.querySelector('.load-more');
 
 let simplelightbox = new SimpleLightbox('.gallery a');
 
-
 let page = 12;
 let searchQuery = '';
-let limit = 500;
 let per_page = 40;
-let totalPages = Math.round(limit / per_page);
 
 form.addEventListener('submit', onSubmit);
 paginationBtn.addEventListener('click', onPagination);
@@ -49,14 +46,17 @@ function onSubmit(evt) {
 
 function onPagination() {
   page += 1;
-    if (page === totalPages) {
-      Notiflix.Notify.info(
-        'We are sorry, but you have reached the end of search results.'
-      );
-      paginationBtn.style.display = 'none';
-    }
-
+ 
   getPhotos(searchQuery, page).then(data => {
+    const totalPages = Math.round(data.totalHits / per_page);
+    
+     if (page === totalPages) {
+       Notiflix.Notify.info(
+         'We are sorry, but you have reached the end of search results.'
+       );
+       paginationBtn.style.display = 'none';
+     }
+    
     gallery.insertAdjacentHTML('beforeend', createMarkup(data.hits));
 
     simplelightbox.refresh();
@@ -76,7 +76,6 @@ async function getPhotos(query, page) {
     page: page
   });
 
-  // const URL = `${BASE_URL}?key=${KEY}&q=${query}&image_type=photo&orientation=horizontal&safesearch=true&per_page=${per_page}&page=${page}`;
   try {
     const response = await axios.get(`${BASE_URL}?${params}`);
     const { data } = response;
@@ -85,6 +84,7 @@ async function getPhotos(query, page) {
     console.error(error);
   }
 }
+
 
 function createMarkup(arr) {
   return arr
@@ -123,13 +123,3 @@ function createMarkup(arr) {
 }
 
 
-// function smoothScroll() {
-//    const { height: cardHeight } = document
-//      .querySelector('.gallery')
-//      .firstElementChild.getBoundingClientRect();
-
-//    window.scrollBy({
-//      top: cardHeight * 2,
-//      behavior: 'smooth',
-//    });
-// }
